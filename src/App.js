@@ -1,6 +1,7 @@
+import React, { useEffect, memo } from 'react';
 import * as THREE from 'three';
 
-import { moveRightKeyDown, moveLeftKeyDown } from "rx/keyboard";
+import {moveRightKeyDown, moveLeftKeyDown, spaceKeyDown, sched } from "rx/keyboard";
 
 import './App.css';
 
@@ -31,18 +32,24 @@ function init() {
 }
 
 function animation() {
-
   mesh.rotation.x += 0.01;
   mesh.rotation.y += 0.01;
-
+  // keys rx handling
+  if (moveLeftKeyDown.value) mesh.position.x -= 0.01;
+  if (moveRightKeyDown.value) mesh.position.x += 0.01;
+  if (spaceKeyDown.value) sched.flush()
   renderer.render( scene, camera );
 }
 
-function App() {
+const jumpFunc = x => {
+  return Math.abs(x - 50)
+}
+
+const App = () => {
   if (!isTreeEnvUp) init();
-  let updateId;
+  // let updateId;
   let previousDelta = 0;
-  const fpsLimit = 30;
+  const fpsLimit = 60;
 
   function update(currentDelta) {
     requestAnimationFrame(animation);
@@ -55,11 +62,48 @@ function App() {
     previousDelta = currentDelta;
   }
 
-  window.addEventListener('keydown', (event) => {
-    console.log(event.currentTarget);
-    moveRightKeyDown.next();
-    moveLeftKeyDown.next();
-  });
+  const keyUpHandler = event => {
+    switch(event.code) {
+      case 'ArrowRight':
+        moveRightKeyDown.next(false);
+        break;
+      case 'ArrowLeft':
+        moveLeftKeyDown.next(false);
+        break;
+      case 'Space':
+        spaceKeyDown.next(false);
+        break;
+      default:
+        break;
+    }
+  }
+
+  const keyDownHandler = event => {
+    console.log(event.code);
+    switch(event.code) {
+      case 'ArrowRight':
+        moveRightKeyDown.next(true);
+        break;
+      case 'ArrowLeft':
+        moveLeftKeyDown.next(true);
+        break;
+      case 'Space':
+        spaceKeyDown.next(true);
+        break;
+      default:
+        break;
+    }
+  }
+
+  useEffect(() => {
+    window.addEventListener('keyup', keyUpHandler)
+    window.addEventListener('keydown', keyDownHandler)
+
+    return () => {
+      window.removeEventListener('keyup', keyUpHandler)
+      window.removeEventListener('keydown', keyDownHandler)
+    }
+  }, [])
 
   return (
     <div className="App">
@@ -68,4 +112,4 @@ function App() {
   );
 }
 
-export default App;
+export default memo(App);
