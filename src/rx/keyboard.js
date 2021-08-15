@@ -5,13 +5,17 @@ export const moveRightKeyDown = new BehaviorSubject(false);
 export const moveLeftKeyDown = new BehaviorSubject(false);
 export const spaceKeyDown = new BehaviorSubject(false);
 
-export const sched = from([0,1,2,3]).pipe(
+const JUMP_DURATION = 2000;
+const RANGE_VALUES_AMOUNT = 100;
+const COMMON_RANGE = Array.from(Array(RANGE_VALUES_AMOUNT).keys()) // Jump
+const RANGE_DELAY = JUMP_DURATION / RANGE_VALUES_AMOUNT
+
+export const jumpFunc = x => {
+    return Math.abs(x - 50)
+}
+
+export const rangeValuesEmitter = from(COMMON_RANGE).pipe(
     concatMap(val => {
-        // console.log(val)
-        return of(val).pipe(delay(1500))
+        return of(val).pipe(delay(RANGE_DELAY))
     }),
-    // concatMap(val => {
-    //     console.log(val)
-    //     return of(val)
-    // }),
-).subscribe(val => console.log(val));
+);

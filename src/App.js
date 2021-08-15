@@ -1,7 +1,7 @@
 import React, { useEffect, memo } from 'react';
 import * as THREE from 'three';
 
-import {moveRightKeyDown, moveLeftKeyDown, spaceKeyDown, sched } from "rx/keyboard";
+import { moveRightKeyDown, moveLeftKeyDown, spaceKeyDown, rangeValuesEmitter } from "rx/keyboard";
 
 import './App.css';
 
@@ -37,12 +37,12 @@ function animation() {
   // keys rx handling
   if (moveLeftKeyDown.value) mesh.position.x -= 0.01;
   if (moveRightKeyDown.value) mesh.position.x += 0.01;
-  if (spaceKeyDown.value) sched.flush()
+  // console.log(spaceKeyDown.value)
+  if (spaceKeyDown.value) rangeValuesEmitter.subscribe(val => { // also check that not in a jump state
+    console.log(val);
+    mesh.position.y += val / 100
+  })
   renderer.render( scene, camera );
-}
-
-const jumpFunc = x => {
-  return Math.abs(x - 50)
 }
 
 const App = () => {
